@@ -1,0 +1,73 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">
+        {% if detalle %}Editar Detalle de Pedido{% else %}Nuevo Detalle de Pedido{% endif %}
+    </h2>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" autocomplete="off">
+        {% csrf_token %}
+        {% if detalle %}
+            <input type="hidden" name="id" value="{{ detalle.id }}">
+        {% endif %}
+
+        <div class="mb-3">
+            <label for="pedido_id" class="form-label">Pedido</label>
+            <select class="form-select" id="pedido_id" name="pedido_id" required>
+                <option value="">Seleccione...</option>
+                {% for pedido in pedidos %}
+                    <option value="{{ pedido.id }}"
+                        {% if detalle and detalle.pedido.id == pedido.id %}
+                            selected
+                        {% endif %}
+                    >Pedido #{{ pedido.id }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="menu_id" class="form-label">Menú</label>
+            <select class="form-select" id="menu_id" name="menu_id" required>
+                <option value="">Seleccione...</option>
+                {% for menu in menus %}
+                    <option value="{{ menu.id }}"
+                        {% if detalle and detalle.menu.id == menu.id %}
+                            selected
+                        {% endif %}
+                    >{{ menu.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="cantidad" class="form-label">Cantidad</label>
+            <input type="number" class="form-control" id="cantidad" name="cantidad" min="1" required
+                   value="{{ detalle.cantidad|default_if_none:'' }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="precio" class="form-label">Precio Unitario</label>
+            <input type="number" step="0.01" class="form-control" id="precio" name="precio" required
+                   value="{{ detalle.precio|default_if_none:'' }}">
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'getalldetallespedido' %}" class="btn btn-secondary">Volver</a>
+            <button type="submit" class="btn btn-success">
+                {% if detalle %}Actualizar{% else %}Guardar{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

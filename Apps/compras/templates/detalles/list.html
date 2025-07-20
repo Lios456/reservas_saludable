@@ -1,0 +1,56 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Lista de Detalles de Pedido</h2>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="mb-3">
+        <a href="{% url 'creardetallespedido' %}" class="btn btn-success">+ Nuevo Detalle</a>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Pedido</th>
+                <th>Menú</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for detalle in detalles_pedido %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>Pedido #{{ detalle.pedido.id }}</td>
+                    <td>{{ detalle.menu.nombre }}</td>
+                    <td>{{ detalle.cantidad }}</td>
+                    <td>${{ detalle.precio }}</td>
+                    <td>
+                        <a href="{% url 'actualizardetallespedido' detalle.id %}" class="btn btn-primary btn-sm">Editar</a>
+                        <form action="{% url 'eliminardetallespedido' detalle.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que quieres eliminar este detalle?');">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No hay detalles registrados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

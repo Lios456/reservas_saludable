@@ -1,0 +1,58 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Lista de Repartidores</h2>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="mb-3">
+        <a href="{% url 'crearrepartidor' %}" class="btn btn-success">+ Nuevo Repartidor</a>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Teléfono</th>
+                <th>Edad</th>
+                <th>Dirección</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for repartidor in repartidores %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ repartidor.nombre }}</td>
+                    <td>{{ repartidor.apellido }}</td>
+                    <td>{{ repartidor.telefono }}</td>
+                    <td>{{ repartidor.edad }}</td>
+                    <td>{{ repartidor.direccion }}</td>
+                    <td>
+                        <a href="{% url 'actualizarrepartidor' repartidor.id %}" class="btn btn-primary btn-sm">Editar</a>
+                        <form action="{% url 'eliminarrepartidor' repartidor.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que quieres eliminar este repartidor?');">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">No hay repartidores registrados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

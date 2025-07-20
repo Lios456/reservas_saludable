@@ -78,7 +78,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'entregas_db',
         'USER': 'postgres',
-        'PASSWORD': 'toor',
+        'PASSWORD': '1234',
         'HOST': 'localhost',
         'PORT': '5432',
     }

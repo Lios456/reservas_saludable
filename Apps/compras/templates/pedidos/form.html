@@ -1,0 +1,85 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">
+        {% if pedido %}Editar Pedido{% else %}Nuevo Pedido{% endif %}
+    </h2>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" autocomplete="off">
+        {% csrf_token %}
+        {% if pedido %}
+            <input type="hidden" name="id" value="{{ pedido.id }}">
+        {% endif %}
+
+        <div class="mb-3">
+            <label for="usuario_id" class="form-label">Usuario</label>
+            <select class="form-select" id="usuario_id" name="usuario_id" required>
+                <option value="">Seleccione...</option>
+                {% for usuario in usuarios %}
+                    <option value="{{ usuario.id }}"
+                        {% if pedido and pedido.usuario.id == usuario.id %}
+                            selected
+                        {% endif %}
+                    >{{ usuario.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="restaurante_id" class="form-label">Restaurante</label>
+            <select class="form-select" id="restaurante_id" name="restaurante_id" required>
+                <option value="">Seleccione...</option>
+                {% for restaurante in restaurantes %}
+                    <option value="{{ restaurante.id }}"
+                        {% if pedido and pedido.restaurante.id == restaurante.id %}
+                            selected
+                        {% endif %}
+                    >{{ restaurante.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="fecha" class="form-label">Fecha</label>
+            <input type="datetime-local" class="form-control" id="fecha" name="fecha"
+                   value="{% if pedido %}{{ pedido.fecha|date:'Y-m-d\TH:i' }}{% endif %}" {% if pedido %}readonly{% endif %}>
+            <small class="text-muted">La fecha se asigna automáticamente al crear el pedido.</small>
+        </div>
+
+        <div class="mb-3">
+            <label for="total" class="form-label">Total</label>
+            <input type="number" step="0.01" class="form-control" id="total" name="total" required
+                   value="{{ pedido.total|default_if_none:'' }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="estado" class="form-label">Estado</label>
+            <select class="form-select" id="estado" name="estado" required>
+                <option value="">Seleccione...</option>
+                <option value="pendiente" {% if pedido and pedido.estado == "pendiente" %}selected{% endif %}>Pendiente</option>
+                <option value="en_preparacion" {% if pedido and pedido.estado == "en_preparacion" %}selected{% endif %}>En preparación</option>
+                <option value="en_camino" {% if pedido and pedido.estado == "en_camino" %}selected{% endif %}>En camino</option>
+                <option value="entregado" {% if pedido and pedido.estado == "entregado" %}selected{% endif %}>Entregado</option>
+            </select>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'getallpedidos' %}" class="btn btn-secondary">Volver</a>
+            <button type="submit" class="btn btn-success">
+                {% if pedido %}Actualizar{% else %}Guardar{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

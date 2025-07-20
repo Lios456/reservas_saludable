@@ -1,0 +1,61 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">
+        {% if asignacion %}Editar Asignación{% else %}Nueva Asignación{% endif %}
+    </h2>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" autocomplete="off">
+        {% csrf_token %}
+        {% if asignacion %}
+            <input type="hidden" name="id" value="{{ asignacion.id }}">
+        {% endif %}
+
+        <div class="mb-3">
+            <label for="pedido_id" class="form-label">Pedido</label>
+            <select class="form-select" id="pedido_id" name="pedido_id" required>
+                <option value="">Seleccione...</option>
+                {% for pedido in pedidos %}
+                    <option value="{{ pedido.id }}"
+                        {% if asignacion and asignacion.pedido.id == pedido.id %}
+                            selected
+                        {% endif %}
+                    >Pedido #{{ pedido.id }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="repartidor_id" class="form-label">Repartidor</label>
+            <select class="form-select" id="repartidor_id" name="repartidor_id" required>
+                <option value="">Seleccione...</option>
+                {% for repartidor in repartidores %}
+                    <option value="{{ repartidor.id }}"
+                        {% if asignacion and asignacion.repartidor.id == repartidor.id %}
+                            selected
+                        {% endif %}
+                    >{{ repartidor.nombre }} {{ repartidor.apellido }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'getallasignacionpedido' %}" class="btn btn-secondary">Volver</a>
+            <button type="submit" class="btn btn-success">
+                {% if asignacion %}Actualizar{% else %}Guardar{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

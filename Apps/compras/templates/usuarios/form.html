@@ -1,0 +1,53 @@
+{% extends "base_dashboard.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">
+        {% if form.instance.pk %}Editar Usuario{% else %}Nuevo Usuario{% endif %}
+    </h2>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" autocomplete="off">
+        {% csrf_token %}
+        {% if form.instance.pk %}
+            <input type="hidden" name="id" value="{{ form.instance.pk }}">
+        {% endif %}
+
+        <div class="mb-3">
+            <label for="id_username" class="form-label">Usuario</label>
+            {{ form.username|as_widget(attrs={'class': 'form-control', 'placeholder': 'Nombre de usuario', 'id': 'id_username'}) }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_email" class="form-label">Email</label>
+            {{ form.email|as_widget(attrs={'class': 'form-control', 'placeholder': 'Correo electrónico', 'id': 'id_email'}) }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_password1" class="form-label">Contraseña</label>
+            {{ form.password1|as_widget(attrs={'class': 'form-control', 'placeholder': 'Contraseña', 'id': 'id_password1'}) }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_password2" class="form-label">Confirmar Contraseña</label>
+            {{ form.password2|as_widget(attrs={'class': 'form-control', 'placeholder': 'Repite la contraseña', 'id': 'id_password2'}) }}
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'getallusuarios' %}" class="btn btn-secondary">Volver</a>
+            <button type="submit" class="btn btn-success">
+                {% if form.instance.pk %}Actualizar{% else %}Guardar{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
