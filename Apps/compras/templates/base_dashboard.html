@@ -1,0 +1,292 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sistema de entrega de pedidos</title>
+    <link
+      rel="shortcut icon"
+      type="image/png"
+      href="{% static './assets/images/logos/favicon.png' %}"
+    />
+    <link rel="stylesheet" href="{% static './assets/css/styles.min.css' %}" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.4/css/buttons.dataTables.css">
+  </head>
+
+  <body>
+    <!--  Body Wrapper -->
+    <div
+      class="page-wrapper"
+      id="main-wrapper"
+      data-layout="vertical"
+      data-navbarbg="skin6"
+      data-sidebartype="full"
+      data-sidebar-position="fixed"
+    >
+      <!--  App Topstrip -->
+      <div
+        class="app-topstrip bg-dark py-6 px-3 w-100 d-lg-flex align-items-center justify-content-between"
+      >
+        <div
+          class="d-flex align-items-center justify-content-center gap-5 mb-2 mb-lg-0"
+        >
+          <a class="d-flex justify-content-center" href="#">
+            <img
+              src="{% static './assets/images/logos/logo-wrappixel.svg' %}"
+              alt=""
+              width="150"
+            />
+          </a>
+        </div>
+      </div>
+      <!-- Sidebar Start -->
+      <aside class="left-sidebar">
+        <!-- Sidebar scroll-->
+        <div>
+          <div
+            class="brand-logo d-flex align-items-center justify-content-between"
+          >
+            <a href="/" class="text-nowrap logo-img">
+              <img src="{% static './assets/images/logos/logo.svg' %}" alt="" />
+            </a>
+            <div
+              class="close-btn d-xl-none d-block sidebartoggler cursor-pointer"
+              id="sidebarCollapse"
+            >
+              <i class="ti ti-x fs-6"></i>
+            </div>
+          </div>
+          <!-- Sidebar navigation-->
+          <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+            <ul id="sidebarnav">
+              <li class="nav-small-cap">
+                <iconify-icon
+                  icon="solar:menu-dots-linear"
+                  class="nav-small-cap-icon fs-4"
+                ></iconify-icon>
+                <span class="hide-menu">Administación</span>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link"
+                  href="/dashboard/"
+                  aria-expanded="false"
+                >
+                  <i class="ti ti-atom"></i>
+                  <span class="hide-menu">Dashboard</span>
+                </a>
+              </li>
+              <!-- ---------------------------------- -->
+              <!-- Dashboard -->
+              <!-- ---------------------------------- -->
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link justify-content-between"
+                  href="/usuarios/"
+                  aria-expanded="false"
+                >
+                  <div class="d-flex align-items-center gap-3">
+                    <span class="d-flex">
+                      <i class="ti ti-users"></i>
+                    </span>
+                    <span class="hide-menu">Usuarios</span>
+                  </div>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link justify-content-between"
+                  href="/repartidores/"
+                  aria-expanded="false"
+                >
+                  <div class="d-flex align-items-center gap-3">
+                    <span class="d-flex">
+                      <i class="ti ti-user"></i>
+                    </span>
+                    <span class="hide-menu">Repartidores</span>
+                  </div>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link justify-content-between has-arrow"
+                  href="javascript:void(0)"
+                  aria-expanded="false"
+                >
+                  <div class="d-flex align-items-center gap-3">
+                    <span class="d-flex">
+                      <i class="ti ti-shopping-cart"></i>
+                    </span>
+                    <span class="hide-menu">Restaurantes</span>
+                  </div>
+                </a>
+                <ul aria-expanded="false" class="collapse first-level">
+                  <li class="sidebar-item">
+                    <a class="sidebar-link justify-content-between" href="/restaurantes/">
+                      <div class="d-flex align-items-center gap-3">
+                        <div
+                          class="round-16 d-flex align-items-center justify-content-center"
+                        >
+                          <i class="ti ti-circle"></i>
+                        </div>
+                        <span class="hide-menu">Gestionar</span>
+                      </div>
+                    </a>
+                  </li> 
+                  
+                  <li class="sidebar-item">
+                    <a class="sidebar-link justify-content-between" href="/pedidos/">
+                      <div class="d-flex align-items-center gap-3">
+                        <div
+                          class="round-16 d-flex align-items-center justify-content-center"
+                        >
+                          <i class="ti ti-circle"></i>
+                        </div>
+                        <span class="hide-menu">Pedidos</span>
+                      </div>
+                    </a>
+                  </li> 
+                  
+                </ul> 
+              </li>            
+            </ul>
+          </nav>
+          <!-- End Sidebar navigation -->
+        </div>
+        <!-- End Sidebar scroll-->
+      </aside>
+      <!--  Sidebar End -->
+      <!--  Main wrapper -->
+      <div class="body-wrapper">
+        <div class="body-wrapper-inner">
+          <div class="container-fluid">
+            <div class="card">
+              <div class="card-body">{% block content %} {% endblock %}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="{% static './assets/libs/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static './assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static './assets/js/sidebarmenu.js' %}"></script>
+    <script src="{% static './assets/js/app.min.js' %}"></script>
+    <script src="{% static './assets/libs/simplebar/dist/simplebar.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.4/js/dataTables.buttons.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.dataTables.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.html5.min.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        $('.select2').select2();
+        new DataTable('.datatable', {
+            layout: {
+                topStart: {
+                    buttons: ['copyHtml5', 'excelHtml5', 'csvHtml5', 'pdfHtml5']
+                }
+            }
+        });
+        $(".tree-toggle").click(function () {
+          const target = $(this).data("target");
+          $("#" + target).toggleClass("active");
+          $(this).toggleClass("fa-chevron-right fa-chevron-down");
+        });
+
+        // Configuración de validación jQuery
+        const validationRules = {
+          username: {
+            required: true,
+            minlength: 3,
+            maxlength: 150,
+          },
+          email: {
+            required: true,
+            email: true,
+          },
+          password1: {
+            required: true,
+            minlength: 8,
+          },
+          password2: {
+            required: true,
+            equalTo: "#usuario-password1",
+          },
+          nombre: {
+            required: true,
+            minlength: 2,
+            maxlength: 255,
+          },
+          telefono: {
+            required: true,
+            phoneEC: true,
+          },
+          direccion: {
+            required: true,
+            minlength: 5,
+          },
+          horario: {
+            required: true,
+          },
+          precio: {
+            required: true,
+            number: true,
+            min: 0.01,
+          },
+          cantidad: {
+            required: true,
+            digits: true,
+            min: 1,
+          },
+          edad: {
+            required: true,
+            digits: true,
+            range: [18, 65],
+          },
+          descripcion: {
+            required: true,
+            minlength: 10,
+          },
+          restaurante_id: {
+            required: true,
+          },
+          menu_id: {
+            required: true,
+          },
+          pedido_id: {
+            required: true,
+          },
+          repartidor_id: {
+            required: true,
+          },
+          estado: {
+            required: true,
+          },
+        };
+
+        // Validación personalizada para teléfonos ecuatorianos
+        $.validator.addMethod(
+          "phoneEC",
+          function (value, element) {
+            return this.optional(element) || /^(\+593|0)?[0-9]{9}$/.test(value);
+          },
+          "Por favor ingrese un número de teléfono válido de Ecuador"
+        );
+      });
+    </script>
+    {% block extra_js %} {% endblock %}
+
+    <!-- solar icons -->
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+  </body>
+</html>

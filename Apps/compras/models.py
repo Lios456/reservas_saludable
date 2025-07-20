@@ -12,7 +12,7 @@ class Restaurante(models.Model):
 
 class Menu(models.Model):
     restaurante = models.ForeignKey(Restaurante, on_delete=models.CASCADE)
-    foto = models.ImageField(upload_to=f'menu_fotos/{restaurante}/')
+    foto = models.ImageField(upload_to=f'menu_fotos/')
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField()
     precio = models.DecimalField(max_digits=10, decimal_places=2)

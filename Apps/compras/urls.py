@@ -19,7 +19,8 @@ urlpatterns = [
     
     #Menu
     path('menus/', views.getallmenus, name='getallmenus'),
-    path('crearmenu/', views.crearmenu, name='crearmenu'),
+    path('menus/<int:id_restaurante>/', views.getallmenusbyrestaurante, name='getallmenusbyrestaurante'),
+    path('crearmenu/<int:id_restaurante>/', views.crearmenu, name='crearmenu'),
     path('actualizarmenu/<int:menu_id>/', views.actualizarmenu, name='actualizarmenu'),
     path('eliminarmenu/<int:menu_id>/', views.eliminarmenu, name='eliminarmenu'),
     
@@ -43,7 +44,8 @@ urlpatterns = [
 
     # Asignaciones
     path('asignaciones/', views.getallasignacionpedido, name='getallasignaciones'),
-    path('crearasignacion/', views.crearasignacion, name='crearasignacion'),
+    path('asignaciones/<int:id_repartidor>/', views.getallasignacionpedidobyrepartidor, name='getallasignacionpedidobyrepartidor'),
+    path('crearasignacion/<int:id_pedido>/', views.crearasignacion, name='crearasignacion'),
     path('actualizarasignacion/<int:asignacion_id>/', views.actualizarasignacion, name='actualizarasignacion'),
     path('eliminarasignacion/', views.eliminarasignacion, name='eliminarasignacion')
 

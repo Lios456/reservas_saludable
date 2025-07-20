@@ -15,10 +15,10 @@
     {% endif %}
 
     <div class="mb-3">
-        <a href="{% url 'crearmenu' %}" class="btn btn-success">+ Nuevo Menú</a>
+        <a href="{% url 'crearmenu' restaurante.id %}" class="btn btn-success">+ Nuevo Menú</a>
     </div>
 
-    <table class="table table-bordered table-striped">
+    <table class="table table-bordered table-striped datatable">
         <thead>
             <tr>
                 <th>#</th>

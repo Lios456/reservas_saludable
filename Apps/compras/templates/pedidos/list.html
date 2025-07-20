@@ -18,7 +18,7 @@
         <a href="{% url 'crearpedido' %}" class="btn btn-success">+ Nuevo Pedido</a>
     </div>
 
-    <table class="table table-bordered table-striped">
+    <table class="table table-bordered table-striped datatable">
         <thead>
             <tr>
                 <th>#</th>
@@ -53,6 +53,7 @@
                     </td>
                     <td>
                         <a href="{% url 'actualizarpedido' pedido.id %}" class="btn btn-primary btn-sm">Editar</a>
+                        <a href="/crearasignacion/{{ pedido.id }}/" class="btn btn-warning btn-sm">Asignar</a>
                         <form action="{% url 'eliminarpedido' pedido.id %}" method="post" style="display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que quieres eliminar este pedido?');">Eliminar</button>

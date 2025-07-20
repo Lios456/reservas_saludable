@@ -18,7 +18,7 @@
         <a href="{% url 'crearestaurante' %}" class="btn btn-success">+ Nuevo Restaurante</a>
     </div>
 
-    <table class="table table-bordered table-striped">
+    <table class="table table-bordered table-striped datatable">
         <thead>
             <tr>
                 <th>#</th>
@@ -39,6 +39,7 @@
                     <td>{{ restaurante.horario }}</td>
                     <td>
                         <a href="{% url 'actualizarrestaurante' restaurante.id %}" class="btn btn-primary btn-sm">Editar</a>
+                        <a href="/menus/{{ restaurante.id }}/" class="btn btn-warning btn-sm">Ver Menús</a>
                         <form action="{% url 'eliminarrestaurante' restaurante.id %}" method="post" style="display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que quieres eliminar este restaurante?');">Eliminar</button>

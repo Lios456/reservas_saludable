@@ -1,52 +1,82 @@
-{% extends "base_dashboard.html" %}
-
-{% block content %}
+{% extends "base_dashboard.html" %} {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Lista de Asignaciones de Pedido</h2>
+  <h2 class="mb-4">Lista de Asignaciones de Pedido</h2>
 
-    <!-- Mensajes -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+  <!-- Mensajes -->
+  {% if messages %} {% for message in messages %}
+  <div
+    class="alert alert-{{ message.tags }} alert-dismissible fade show"
+    role="alert"
+  >
+    {{ message }}
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Cerrar"
+    ></button>
+  </div>
+  {% endfor %} {% endif %}
 
-    <div class="mb-3">
-        <a href="{% url 'crearasignacion' %}" class="btn btn-success">+ Nueva Asignación</a>
-    </div>
-
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Pedido</th>
-                <th>Repartidor</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for asignacion in asignaciones_pedido %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>Pedido #{{ asignacion.pedido.id }}</td>
-                    <td>{{ asignacion.repartidor.nombre }} {{ asignacion.repartidor.apellido }}</td>
-                    <td>
-                        <a href="{% url 'actualizarasignacion' asignacion.id %}" class="btn btn-primary btn-sm">Editar</a>
-                        <form action="{% url 'eliminarasignacion' asignacion.id %}" method="post" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que quieres eliminar esta asignación?');">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="4" class="text-center">No hay asignaciones registradas.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <table class="table table-bordered table-striped datatable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Pedido</th>
+        <th>Repartidor</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for asignacion in asignaciones_pedido %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>Pedido #{{ asignacion.pedido.id }}</td>
+        <td>
+          {{ asignacion.repartidor.nombre }} {{ asignacion.repartidor.apellido}}
+        </td>
+        <td>
+          {% if asignacion.pedido.estado == "pendiente" %}
+          <span class="badge bg-warning text-dark">Pendiente</span>
+          {% elif asignacion.pedido.estado == "en_preparacion" %}
+          <span class="badge bg-info text-dark">En preparación</span>
+          {% elif asignacion.pedido.estado == "en_camino" %}
+          <span class="badge bg-primary">En camino</span>
+          {% elif asignacion.pedido.estado == "entregado" %}
+          <span class="badge bg-success">Entregado</span>
+          {% else %} {{ asignacion.pedido.estado }} {% endif %}
+        </td>
+        <td>
+          <a
+            href="{% url 'actualizarasignacion' asignacion.id %}"
+            class="btn btn-primary btn-sm"
+            >Editar</a
+          >
+          <form
+            action="/eliminarasignacion/{{asignacion.id}}"
+            method="post"
+            style="display: inline"
+          >
+            {% csrf_token %}
+            <button
+              type="submit"
+              class="btn btn-danger btn-sm"
+              onclick="return confirm('¿Seguro que quieres eliminar esta asignación?');"
+            >
+              Eliminar
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" class="text-center">
+          No hay asignaciones registradas.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}

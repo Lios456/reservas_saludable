@@ -24,21 +24,12 @@
 
         <div class="mb-3">
             <label for="pedido_id" class="form-label">Pedido</label>
-            <select class="form-select" id="pedido_id" name="pedido_id" required>
-                <option value="">Seleccione...</option>
-                {% for pedido in pedidos %}
-                    <option value="{{ pedido.id }}"
-                        {% if asignacion and asignacion.pedido.id == pedido.id %}
-                            selected
-                        {% endif %}
-                    >Pedido #{{ pedido.id }}</option>
-                {% endfor %}
-            </select>
+            <input type="text" name="pedido_id" id="pedido_id" value="{{ pedido.pk }}" disabled class="form-control">
         </div>
 
         <div class="mb-3">
             <label for="repartidor_id" class="form-label">Repartidor</label>
-            <select class="form-select" id="repartidor_id" name="repartidor_id" required>
+            <select class="form-select select2" id="repartidor_id" name="repartidor_id" required>
                 <option value="">Seleccione...</option>
                 {% for repartidor in repartidores %}
                     <option value="{{ repartidor.id }}"
@@ -51,7 +42,7 @@
         </div>
 
         <div class="d-flex justify-content-between">
-            <a href="{% url 'getallasignacionpedido' %}" class="btn btn-secondary">Volver</a>
+            <a href="/pedidos/" class="btn btn-secondary">Volver</a>
             <button type="submit" class="btn btn-success">
                 {% if asignacion %}Actualizar{% else %}Guardar{% endif %}
             </button>

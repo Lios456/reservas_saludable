@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container mt-4">
     <h2 class="mb-4">
-        {% if menu %}Editar Menú{% else %}Nuevo Menú{% endif %}
+        {% if menu %}Editar Menú {{menu.nombre}} de {{menu.restaurante.nombre}} {% else %}Nuevo Menú para {{ restaurante.nombre }}{% endif %}
     </h2>
 
     <!-- Mensajes -->
@@ -16,59 +16,28 @@
         {% endfor %}
     {% endif %}
 
-    <form method="post" enctype="multipart/form-data" autocomplete="off">
+    <form method="post" enctype="multipart/form-data" autocomplete="off" action="{% if menu %}{% url 'actualizarmenu' menu.id %}{% else %}{% url 'crearmenu' restaurante.id %}{% endif %}">
         {% csrf_token %}
-        {% if menu %}
-            <input type="hidden" name="id" value="{{ menu.id }}">
-        {% endif %}
-
-        <div class="mb-3">
-            <label for="restaurante_id" class="form-label">Restaurante</label>
-            <select class="form-select" id="restaurante_id" name="restaurante_id" required>
-                <option value="">Seleccione...</option>
-                {% for restaurante in restaurantes %}
-                    <option value="{{ restaurante.id }}"
-                        {% if menu and menu.restaurante.id == restaurante.id %}
-                            selected
-                        {% endif %}
-                    >{{ restaurante.nombre }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="foto" class="form-label">Foto del Menú</label>
-            <input type="file" class="form-control" id="foto" name="foto" accept="image/*">
-            {% if menu and menu.foto %}
-                <div class="mt-2">
-                    <img src="{{ menu.foto.url }}" alt="Foto actual" width="100" class="rounded">
-                </div>
-            {% endif %}
-        </div>
-
         <div class="mb-3">
             <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control" id="nombre" name="nombre" required
-                   value="{{ menu.nombre|default_if_none:'' }}">
+            <input type="text" class="form-control" id="nombre" name="nombre" value="{% if menu %}{{ menu.nombre }}{% endif %}" required>
         </div>
-
         <div class="mb-3">
             <label for="descripcion" class="form-label">Descripción</label>
-            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required>{{ menu.descripcion|default_if_none:'' }}</textarea>
+            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required>{% if menu %}{{ menu.descripcion }}{% endif %}</textarea>
         </div>
-
         <div class="mb-3">
             <label for="precio" class="form-label">Precio</label>
-            <input type="number" step="0.01" class="form-control" id="precio" name="precio" required
-                   value="{{ menu.precio|default_if_none:'' }}">
+            <input type="number" step="0.01" class="form-control" id="precio" name="precio" value="{% if menu %}{{ menu.precio|safe }}{% endif %}" required>
         </div>
-
-        <div class="d-flex justify-content-between">
-            <a href="{% url 'getallmenus' %}" class="btn btn-secondary">Volver</a>
-            <button type="submit" class="btn btn-success">
-                {% if menu %}Actualizar{% else %}Guardar{% endif %}
-            </button>
+        <div class="mb-3">
+            <label for="imagen" class="form-label">Imagen</label>
+            <input type="file" class="form-control" id="foto" name="foto" {% if not menu %}required{% endif %}>
+            {% if menu and menu.foto %}
+                <img src="{{ menu.foto.url }}" alt="Imagen actual" class="img-thumbnail mt-2" style="max-width: 200px;">
+            {% endif %}
         </div>
+        <button type="submit" class="btn btn-primary">{% if menu %}Actualizar{% else %}Crear{% endif %}</button>
     </form>
 </div>
 {% endblock %}

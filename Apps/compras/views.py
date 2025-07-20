@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import User, UserCreationForm
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import  Restaurante, Menu, Pedido, Repartidor, AsignacionPedido
 
@@ -13,8 +13,9 @@ from .models import  Restaurante, Menu, Pedido, Repartidor, AsignacionPedido
 def index(request):
     return render(request, 'index.html')
 
-
+# ============================================================================================================
 # Views de Usuario
+# ============================================================================================================
 
 # Login
 def login_view(request):
@@ -27,7 +28,7 @@ def login_view(request):
             return redirect('/usuarios/')
         else:
             messages.error(request, 'Credenciales inválidas', extra_tags='danger')
-    return render(request, 'login.html')
+    return render(request, 'auth/login.html')
 
 # Logout
 @login_required(login_url='/login/')
@@ -42,7 +43,7 @@ def logout_view(request):
 @login_required(login_url='/login/')
 @staff_member_required
 def getallusuarios(request):
-    usuarios = Usuario.objects.all()
+    usuarios = User.objects.all()
     context = {'usuarios': usuarios}
     messages.success(request, 'Usuarios recuperados correctamente', extra_tags='success')
     return render(request, 'usuarios/list.html', context)
@@ -50,31 +51,32 @@ def getallusuarios(request):
 #Crear
 def crearusuario(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            
-            usuario = form.save()
-            usuario.is_staff = False
-            usuario.save()
-            messages.success(request, 'Usuario creado correctamente', extra_tags='success')
-            return redirect('/usuarios/')
+        usuario = User()
+        usuario.username = request.POST.get('username', '').strip()
+        usuario.email = request.POST.get('email', '').strip()
+        usuario.set_password(request.POST.get('password', '').strip())
+        usuario.is_staff = False
+        usuario.save()
+        messages.success(request, 'Usuario creado correctamente', extra_tags='success')
+        return redirect('/usuarios/')
     else:
-        return render(request, 'usuarios/create.html')
+        return render(request, 'usuarios/form.html')
 
 
 #Editar
 @login_required(login_url='/login/')
 def editarusuario(request, usuario_id):
-    usuario = get_object_or_404(Usuario, pk=usuario_id)
+    usuario = get_object_or_404(User, pk=usuario_id)
     if request.method == 'POST':
-        form = UserCreationForm(request.POST, instance=usuario)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Usuario editado correctamente', extra_tags='success')
-            return redirect('/usuarios/')
+        usuario.username = request.POST.get('username') or usuario.username
+        usuario.email = request.POST.get('email') or usuario.email
+        usuario.set_password(request.POST.get('password', '').strip() or usuario.password)
+        usuario.save()
+        messages.success(request, 'Usuario editado correctamente', extra_tags='success')
+        return redirect('/usuarios/')
     else:
         form = UserCreationForm(instance=usuario)
-        return render(request, 'usuarios/form.html', {'form': form})
+        return render(request, 'usuarios/form.html', {'usuario':usuario})
 
 
 #Eliminar
@@ -94,8 +96,9 @@ def eliminarusuario(request, usuario_id):
     return redirect('/usuarios/')
 
 
-
+# ============================================================================================================
 # Views de Restaurante
+# ============================================================================================================
 
 #Listar
 
@@ -157,7 +160,9 @@ def eliminarrestaurante(request, restaurante_id):
 
 
 
+# ============================================================================================================
 # Views de Menú
+# ============================================================================================================
 
 #Listar
 def getallmenus(request):
@@ -165,21 +170,28 @@ def getallmenus(request):
     context = {'menus': menus}
     return render(request, 'menus/list.html', context)
 
+def getallmenusbyrestaurante(request, id_restaurante):
+    menus = Menu.objects.filter(restaurante_id=id_restaurante)
+    context = {'menus': menus, 'restaurante': Restaurante.objects.get(pk=id_restaurante)}
+    return render(request,'menus/list.html', context)
 #Crear
 @login_required(login_url='/login/')
 @staff_member_required
-def crearmenu(request):
+def crearmenu(request, id_restaurante):
+    restaurante = Restaurante.objects.get(pk=id_restaurante)
     if request.method == 'POST':
         menu = Menu()
         menu.nombre = request.POST.get('nombre', '').strip()
         menu.descripcion = request.POST.get('descripcion', '').strip()
         menu.precio = request.POST.get('precio', '').strip()
-        menu.restaurante_id = request.POST.get('restaurante_id')
+        menu.restaurante = restaurante
+        menu.foto = request.FILES.get('foto')
         menu.save()
         messages.success(request, 'Menú creado exitosamente.')
-        return redirect('/menus/')
+        return redirect(f'/menus/{restaurante.id}')
     else:
-        return render(request, 'menus/form.html')
+        context = {'restaurante': restaurante}
+        return render(request, 'menus/form.html', context)
 
 #Editar
 @login_required(login_url='/login/')
@@ -190,10 +202,10 @@ def actualizarmenu(request, menu_id):
         menu.nombre = request.POST.get('nombre', '').strip()
         menu.descripcion = request.POST.get('descripcion', '').strip()
         menu.precio = request.POST.get('precio', '').strip()
-        menu.restaurante_id = request.POST.get('restaurante_id')
+        menu.foto = request.FILES.get('foto') or menu.foto
         menu.save()
         messages.success(request, 'Menú actualizado exitosamente.')
-        return redirect('/menus/')
+        return redirect('/restaurantes/')
     else:
         return render(request, 'menus/form.html', {'menu': menu})
 
@@ -210,11 +222,12 @@ def eliminarmenu(request, menu_id):
             messages.error(request, f'Error al eliminar menú: {str(e)}', extra_tags='error')
     else:
         messages.error(request, 'Método no permitido', extra_tags='error')
-    return redirect('/menus/')
+    return redirect('/restaurantes/')
 
 
-
+# ============================================================================================================
 # Views de Pedido
+# ============================================================================================================
 
 #Listar
 def getallpedidos(request):
@@ -267,14 +280,15 @@ def eliminarpedido(request, pedido_id):
     return redirect('/pedidos/')
 
 
-
+# ============================================================================================================
 # Views de DetallesPedido
+# ============================================================================================================
 
 #Listar
 def getalldetallespedido(request):
     detalles_pedido = DetallesPedido.objects.all()
     context = {'detalles_pedido': detalles_pedido}
-    return render(request, 'detallespedido/list.html', context)
+    return render(request, 'detalles/list.html', context)
 
 #Crear
 @login_required(login_url='/login/')
@@ -289,7 +303,7 @@ def creardetallespedido(request):
         messages.success(request, 'Detalle de pedido creado exitosamente.')
         return redirect('/detallespedido/')
     else:
-        return render(request, 'detallespedido/form.html')
+        return render(request, 'detalles/form.html')
 
 #Editar
 @login_required(login_url='/login/')
@@ -304,7 +318,7 @@ def actualizardetallepedido(request, detalle_id):
         messages.success(request, 'Detalle de pedido actualizado exitosamente.')
         return redirect('/detallespedido/')
     else:
-        return render(request, 'detallespedido/form.html', {'detalle': detalle})
+        return render(request, 'detalles/form.html', {'detalle': detalle})
 
 #Eliminar
 @login_required(login_url='/login/')
@@ -322,8 +336,9 @@ def eliminardetallepedido(request, detalle_id):
     return redirect('/detallespedido/')
 
 
-
+# ============================================================================================================
 # Views de Repartidor
+# ============================================================================================================
 
 #Listar
 def getallrepartidores(request):
@@ -339,8 +354,10 @@ def crearrepartidor(request):
     if request.method == 'POST':
         repartidor = Repartidor()
         repartidor.nombre = request.POST.get('nombre', '').strip()
+        repartidor.apellido = request.POST.get('apellido', '').strip()
+        repartidor.direccion = request.POST.get('direccion', '').strip()
+        repartidor.edad = request.POST.get('edad', '').strip()
         repartidor.telefono = request.POST.get('telefono', '').strip()
-        repartidor.disponible = request.POST.get('disponible') == 'on'
         repartidor.save()
         messages.success(request, 'Repartidor creado exitosamente.')
         return redirect('/repartidores/')
@@ -354,8 +371,10 @@ def actualizarrepartidor(request, repartidor_id):
     repartidor = Repartidor.objects.get(pk=repartidor_id)
     if request.method == 'POST':
         repartidor.nombre = request.POST.get('nombre', '').strip()
+        repartidor.apellido = request.POST.get('apellido', '').strip()
+        repartidor.edad = request.POST.get('edad', '').strip()
         repartidor.telefono = request.POST.get('telefono', '').strip()
-        repartidor.disponible = request.POST.get('disponible') == 'on'
+        repartidor.direccion = request.POST.get('direccion', '').strip()
         repartidor.save()
         messages.success(request, 'Repartidor actualizado exitosamente.')
         return redirect('/repartidores/')
@@ -378,20 +397,39 @@ def eliminarrepartidor(request, repartidor_id):
     return redirect('/repartidores/')
 
 
-
+# ============================================================================================================
 # Views de Asignación de pedido
+# ============================================================================================================
 
 #Listar
 def getallasignacionpedido(request):
     asignaciones_pedido = AsignacionPedido.objects.all()
     context = {'asignaciones_pedido': asignaciones_pedido}
-    return render(request, 'asignacionpedido/list.html', context)
+    return render(request, 'asignaciones/list.html', context)
 
+def getallasignacionpedidobyrepartidor(request, id_repartidor):
+    asignaciones_pedido = AsignacionPedido.objects.filter(repartidor_id=id_repartidor)
+    context = {'asignaciones_pedido': asignaciones_pedido, 'id_repartidor': id_repartidor}
+    return render(request, 'asignaciones/list.html', context)
 #Crear
 @login_required(login_url='/login/')
 @staff_member_required
-def crearasignacion(request):
+def crearasignacion(request, id_pedido):
+    pedido = Pedido.objects.get(pk=id_pedido)
     if request.method == 'POST':
+        #Ver si ese pedido ya tiene asignación
+        if AsignacionPedido.objects.filter(pedido_id=id_pedido).exists():
+            messages.error(request, 'Este pedido ya tiene asignación', extra_tags='danger')
+            return redirect('/pedidos/')
+        #Ver si el pedido está en estado "En camino"
+        if pedido.estado == 'en_camino':
+            messages.error(request, 'Este pedido no puede ser asignado porque está en estado "En camino"', extra_tags='danger')
+            return redirect('/pedidos/')
+        #Ver si el pedido está en estado "Entregado"
+        if pedido.estado == 'entregado':
+            messages.error(request, 'Este pedido no puede ser asignado porque está en estado "Entregado"', extra_tags='danger')
+            return redirect('/pedidos/')
+        
         asignacion = AsignacionPedido()
         asignacion.fecha_asignacion = request.POST.get('fecha_asignacion')
         asignacion.estado = request.POST.get('estado', '').strip()
@@ -399,9 +437,13 @@ def crearasignacion(request):
         asignacion.repartidor_id = request.POST.get('repartidor_id')
         asignacion.save()
         messages.success(request, 'Asignación creada exitosamente.')
-        return redirect('/asignacionpedido/')
+        return redirect('/pedidos/')
     else:
-        return render(request, 'asignacionpedido/form.html')
+        context = {
+            'pedido': pedido,
+            'repartidores': Repartidor.objects.all()
+        }
+        return render(request, 'asignaciones/form.html', context)
 
 #Editar
 @login_required(login_url='/login/')
@@ -417,7 +459,7 @@ def actualizarasignacion(request, asignacion_id):
         messages.success(request, 'Asignación actualizada exitosamente.')
         return redirect('/asignacionpedido/')
     else:
-        return render(request, 'asignacionpedido/form.html', {'asignacion': asignacion})
+        return render(request, 'asignaciones/form.html', {'asignacion': asignacion})
 
 #Eliminar
 @login_required(login_url='/login/')
