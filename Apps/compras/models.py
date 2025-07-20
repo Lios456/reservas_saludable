@@ -1,34 +1,27 @@
 from django.db import models
-
-from django.contrib.auth.models import AbstractUser
-
-class Usuario(AbstractUser):
-    dirección = models.CharField(max_length=255)
-    teléfono = models.CharField(max_length=20)
-
-    def __str__(self):
-        return self.username
+from django.contrib.auth.models import User
 
 class Restaurante(models.Model):
     nombre = models.CharField(max_length=255)
-    dirección = models.CharField(max_length=255)
-    teléfono = models.CharField(max_length=20)
+    direccion = models.CharField(max_length=255)
+    telefono = models.CharField(max_length=20)
     horario = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.nombre
+        return self.nombres
 
 class Menu(models.Model):
     restaurante = models.ForeignKey(Restaurante, on_delete=models.CASCADE)
+    foto = models.ImageField(upload_to=f'menu_fotos/{restaurante}/')
     nombre = models.CharField(max_length=255)
-    descripción = models.TextField()
+    descripcion = models.TextField()
     precio = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return self.nombre
 
 class Pedido(models.Model):
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     restaurante = models.ForeignKey(Restaurante, on_delete=models.CASCADE)
     fecha = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
@@ -54,7 +47,9 @@ class DetallePedido(models.Model):
 class Repartidor(models.Model):
     nombre = models.CharField(max_length=255)
     apellido = models.CharField(max_length=255)
-    teléfono = models.CharField(max_length=20)
+    telefono = models.CharField(max_length=20)
+    edad = models.IntegerField()
+    direccion = models.CharField(max_length=255)
 
     def __str__(self):
         return f'{self.nombre} {self.apellido}'

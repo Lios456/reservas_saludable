@@ -1,5 +1,9 @@
 from django.shortcuts import render
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.admin.views.decorators import staff_member_required
+
 # Create your views here.
 
 def index(request):
@@ -8,7 +12,31 @@ def index(request):
 
 # Views de Usuario
 
+# Login
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('/usuarios/')
+        else:
+            messages.error(request, 'Credenciales inválidas', extra_tags='danger')
+    return render(request, 'login.html')
+
+# Logout
+@login_required(login_url='/login/')
+def logout_view(request):
+    if request.method == 'POST':
+        logout(request)
+    return redirect('/login/')
+
+
+
 #Listar
+@login_required(login_url='/login/')
+@staff_member_required
 def getallusuarios(request):
     usuarios = Usuario.objects.all()
     context = {'usuarios': usuarios}
@@ -20,6 +48,8 @@ def getallusuarios(request):
 #Editar
 
 #Eliminar
+@login_required(login_url='/login/')
+@staff_member_required
 def eliminarusuario(request, usuario_id):
     if request.method == 'POST':
         try:
@@ -38,6 +68,7 @@ def eliminarusuario(request, usuario_id):
 # Views de Restaurante
 
 #Listar
+
 def getallrestaurantes(request):
     restaurantes = Restaurante.objects.all()
     context = {'restaurantes': restaurantes}
@@ -48,6 +79,8 @@ def getallrestaurantes(request):
 #Editar
 
 #Eliminar
+@login_required(login_url='/login/')
+@staff_member_required
 def eliminarrestaurante(request, restaurante_id):
     if request.method == 'POST':
         try:
@@ -75,6 +108,8 @@ def getallmenus(request):
 #Editar
 
 #Eliminar
+@login_required(login_url='/login/')
+@staff_member_required
 def eliminarmenu(request, menu_id):
     if request.method == 'POST':
         try:
@@ -102,6 +137,8 @@ def getallpedidos(request):
 #Editar
 
 #Eliminar
+@login_required(login_url='/login/')
+@staff_member_required
 def eliminarpedido(request, pedido_id):
     if request.method == 'POST':
         try:
@@ -129,6 +166,8 @@ def getalldetallespedido(request):
 #Editar
 
 #Eliminar
+@login_required(login_url='/login/')
+@staff_member_required
 def eliminardetallepedido(request, detalle_id):
     if request.method == 'POST':
         try:
@@ -157,6 +196,8 @@ def getallrepartidores(request):
 #Editar
 
 #Eliminar
+@login_required(login_url='/login/')
+@staff_member_required
 def eliminarrepartidor(request, repartidor_id):
     if request.method == 'POST':
         try:
@@ -184,6 +225,8 @@ def getallasignacionpedido(request):
 #Editar
 
 #Eliminar
+@login_required(login_url='/login/')
+@staff_member_required
 def eliminarasignacion(request, asignacion_id):
     if request.method == 'POST':
         try:
