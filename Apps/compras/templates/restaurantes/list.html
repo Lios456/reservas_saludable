@@ -16,13 +16,13 @@
       aria-label="Cerrar"
     ></button>
   </div>
-  {% endfor %} {% endif %}
-
+  {% endfor %} {% endif %} {% if user.is_staff %}
   <div class="mb-3">
     <a href="{% url 'crearestaurante' %}" class="btn btn-success"
       >+ Nuevo Restaurante</a
     >
   </div>
+  {% endif %}
 
   <table class="table table-bordered table-striped datatable">
     <thead>
@@ -44,13 +44,11 @@
         <td>{{ restaurante.telefono }}</td>
         <td>{{ restaurante.horario }}</td>
         <td>
+          {% if user.is_staff %}
           <a
             href="{% url 'actualizarrestaurante' restaurante.id %}"
             class="btn btn-primary btn-sm"
             >Editar</a
-          >
-          <a href="/menus/{{ restaurante.id }}/" class="btn btn-warning btn-sm"
-            >Ver Menús</a
           >
           <form
             action="{% url 'eliminarrestaurante' restaurante.id %}"
@@ -66,6 +64,13 @@
               Eliminar
             </button>
           </form>
+          {% endif %}
+
+          <a
+            href="/restaurantes/{{ restaurante.id }}/menus/"
+            class="btn btn-warning btn-sm"
+            >Ver Menús</a
+          >
         </td>
       </tr>
       {% empty %}

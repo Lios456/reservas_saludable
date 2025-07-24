@@ -225,6 +225,13 @@
               Usuarios
             </a>
           </li>
+          <!-- Repartidores -->
+          <li class="nav-item">
+            <a class="nav-link" href="/repartidores/">
+              <i class="fas fa-motorcycle"></i>
+              Repartidores
+            </a>
+          </li>
           {% endif %}
 
           <!-- Login (solo para no autenticados) -->
@@ -236,14 +243,6 @@
             </a>
           </li>
           {% endif %}
-
-          <!-- Repartidores -->
-          <li class="nav-item">
-            <a class="nav-link" href="/repartidores/">
-              <i class="fas fa-motorcycle"></i>
-              Repartidores
-            </a>
-          </li>
 
           <!-- Restaurantes (con dropdown) -->
           <li class="nav-item dropdown">
@@ -272,7 +271,15 @@
           </li>
 
           <!-- Logout (solo para autenticados) -->
-          {% if user.is_authenticated %}
+          {% if user.is_authenticated %} {% if user.is_staff == false %}
+          <li class="nav-item">
+            <a class="nav-link" href="/carrito/">
+              <i class="fas fa-cart-shopping"></i>
+              Carrito
+            </a>
+          </li>
+          {% endif %}
+
           <li class="nav-item mt-3">
             <form action="/logout/" method="post" class="d-inline w-100">
               {% csrf_token %}

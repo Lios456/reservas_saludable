@@ -1,0 +1,193 @@
+{% extends "base_dashboard.html" %} {% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4"><i class="fa fa-shopping-cart"></i> Carrito de Compras</h2>
+
+  <!-- Mensajes -->
+  {% if messages %} {% for message in messages %}
+  <div
+    class="alert alert-{{ message.tags }} alert-dismissible fade show"
+    role="alert"
+  >
+    {{ message }}
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Cerrar"
+    ></button>
+  </div>
+  {% endfor %} {% endif %} {% if carrito %}
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Productos en tu carrito</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Precio Unitario</th>
+                  <th>Cantidad</th>
+                  <th>Subtotal</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in carrito %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      {% if item.menu.foto %}
+                      <img
+                        src="{{ item.menu.foto.url }}"
+                        alt="{{ item.menu.nombre }}"
+                        class="img-thumbnail me-3"
+                        style="width: 60px; height: 60px; object-fit: cover"
+                      />
+                      {% else %}
+                      <div
+                        class="bg-secondary rounded me-3 d-flex align-items-center justify-content-center"
+                        style="width: 60px; height: 60px"
+                      >
+                        <i class="fa fa-utensils text-white"></i>
+                      </div>
+                      {% endif %}
+                      <div>
+                        <strong>{{ item.menu.nombre }}</strong>
+                        <br />
+                        <small class="text-muted"
+                          >{{ item.menu.descripcion|truncatechars:50 }}</small
+                        >
+                      </div>
+                    </div>
+                  </td>
+                  <td>${{ item.menu.precio|floatformat:2 }}</td>
+                  <td>
+                    <form
+                      method="post"
+                      action="{% url 'actualizar_carrito' item.menu.id %}"
+                    >
+                      {% csrf_token %}
+                      <div
+                        class="input-group input-group-sm"
+                        style="width: 120px"
+                      >
+                        <input
+                          type="number"
+                          class="form-control text-center"
+                          name="cantidad"
+                          value="{{ item.cantidad }}"
+                          min="1"
+                          max="99"
+                          required
+                        />
+                        <button type="submit" class="btn btn-outline-primary">
+                          <i class="fa fa-check"></i>
+                        </button>
+                      </div>
+                    </form>
+                  </td>
+                  <td class="fw-bold">${{ item.subtotal|floatformat:2 }}</td>
+                  <td>
+                    <form
+                      method="post"
+                      action="{% url 'eliminar_del_carrito' item.menu.id %}"
+                    >
+                      {% csrf_token %}
+                      <button
+                        type="submit"
+                        class="btn btn-danger btn-sm"
+                        onclick="return confirm('¿Estás seguro de eliminar este producto?')"
+                        title="Eliminar del carrito"
+                      >
+                        <i class="fa fa-trash"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">Resumen del pedido</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal:</span>
+            <span class="fw-bold">${{ total|floatformat:2 }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Envío:</span>
+            <span>$2.00</span>
+          </div>
+          <hr />
+          <div class="d-flex justify-content-between fw-bold h5">
+            <span>Total:</span>
+            <span>${{ total|add:2|floatformat:2 }}</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <form method="post" action="{% url 'guardar_carrito' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success w-100 mb-2">
+              <i class="fa fa-credit-card"></i> Finalizar Compra
+            </button>
+          </form>
+          <form method="post" action="{% url 'vaciar_carrito' %}">
+            {% csrf_token %}
+            <button
+              type="submit"
+              class="btn btn-outline-danger w-100"
+              onclick="return confirm('¿Estás seguro de vaciar el carrito?')"
+            >
+              <i class="fa fa-trash"></i> Vaciar Carrito
+            </button>
+          </form>
+          <a href="/restaurantes/" class="btn btn-outline-primary w-100 mt-2">
+            <i class="fa fa-arrow-left"></i> Seguir comprando
+          </a>
+        </div>
+      </div>
+
+      <!-- Información del restaurante -->
+      {% if carrito %} {% with restaurante=carrito.0.menu.restaurante %}
+      <div class="card mt-3">
+        <div class="card-header">
+          <h6 class="mb-0">Restaurante</h6>
+        </div>
+        <div class="card-body">
+          <strong>{{ restaurante.nombre }}</strong>
+          <br />
+          <small class="text-muted">
+            <i class="fa fa-map-marker"></i> {{ restaurante.direccion }}
+            <br />
+            <i class="fa fa-phone"></i> {{ restaurante.telefono }}
+          </small>
+        </div>
+      </div>
+      {% endwith %} {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <i class="fa fa-shopping-cart fa-5x text-muted mb-3"></i>
+    <h4 class="text-muted">Tu carrito está vacío</h4>
+    <p class="text-muted">Agrega algunos productos para comenzar a comprar.</p>
+    <a href="/restaurantes/" class="btn btn-primary btn-lg">
+      <i class="fa fa-utensils"></i> Ver Menús
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

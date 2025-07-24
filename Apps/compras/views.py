@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.forms import User, UserCreationForm
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from .models import  *
 from django.db.models import Count, Sum, F
 
@@ -15,6 +16,8 @@ from django.db.models import Count, Sum, F
 # Dashboard
 # ============================================================================================================
 
+@login_required(login_url='/login/') 
+@staff_member_required
 def dashboard(request):
 
     #============
@@ -127,9 +130,9 @@ def login_view(request):
         if user is not None:
             login(request, user)
             if user.is_staff:
-                return redirect('/usuarios/')
+                return redirect('getallusuarios')
             else:
-                return redirect('/restaurantes/')
+                return redirect('getallrestaurantes')
         else:
             messages.error(request, 'Credenciales inválidas', extra_tags='danger')
     return render(request, 'auth/login.html')
@@ -139,7 +142,7 @@ def login_view(request):
 def logout_view(request):
     if request.method == 'POST':
         logout(request)
-    return redirect('/login/')
+    return redirect('/')
 
 
 
@@ -162,7 +165,7 @@ def crearusuario(request):
         usuario.is_staff = False
         usuario.save()
         messages.success(request, 'Usuario creado correctamente', extra_tags='success')
-        return redirect('/usuarios/')
+        return redirect('getallusuarios')
     else:
         return render(request, 'usuarios/form.html')
 
@@ -177,7 +180,7 @@ def editarusuario(request, usuario_id):
         usuario.set_password(request.POST.get('password', '').strip() or usuario.password)
         usuario.save()
         messages.success(request, 'Usuario editado correctamente', extra_tags='success')
-        return redirect('/usuarios/')
+        return redirect('getallusuarios')
     else:
         form = UserCreationForm(instance=usuario)
         return render(request, 'usuarios/form.html', {'usuario':usuario})
@@ -196,8 +199,8 @@ def eliminarusuario(request, usuario_id):
             messages.error(request, f'Error al eliminar el usuario: {str(e)}', extra_tags='error')
     else:
         messages.error(request, 'Método no permitido para esta operación', extra_tags='error')
-    
-    return redirect('/usuarios/')
+
+    return redirect('getallusuarios')
 
 
 # ============================================================================================================
@@ -223,8 +226,8 @@ def crearestaurante(request):
         restaurante.horario = request.POST.get('horario', '').strip()
         restaurante.save()
         messages.success(request, 'Restaurante creado exitosamente.')
-        return redirect('/restaurantes/')
-            
+        return redirect('getallrestaurantes')
+
     else:
         return render(request, 'restaurantes/form.html')
 
@@ -242,8 +245,8 @@ def actualizarrestaurante(request, restaurante_id):
         restaurante.horario = request.POST.get('horario', '').strip()
         restaurante.save()
         messages.success(request, 'Restaurante editado exitosamente.')
-        return redirect('/restaurantes/')
-            
+        return redirect('getallrestaurantes')
+
     else:
         return render(request, 'restaurantes/form.html', {'restaurante': restaurante})
 
@@ -363,7 +366,6 @@ def crearpedido(request):
 def actualizarpedido(request, pedido_id):
     pedido = Pedido.objects.get(pk=pedido_id)
     if request.method == 'POST':
-        pedido.fecha = request.POST.get('fecha')
         pedido.estado = request.POST.get('estado', '').strip()
         pedido.total = request.POST.get('total')
         pedido.save()
@@ -394,7 +396,7 @@ def eliminarpedido(request, pedido_id):
 
 #Listar
 def getalldetallespedido(request):
-    detalles_pedido = DetallesPedido.objects.all()
+    detalles_pedido = DetallePedido.objects.all()
     context = {'detalles_pedido': detalles_pedido}
     return render(request, 'detalles/list.html', context)
 
@@ -402,19 +404,177 @@ carrito = []
 #Crear
 @login_required(login_url='/login/')
 def creardetallespedido(request):
+    menu = Menu.objects.get(pk=request.POST.get('menu_id'))
     if request.method == 'POST':
         # Creo el detalle
-        detalle = DetallesPedido()
-        detalle.cantidad = request.POST.get('cantidad')
-        detalle.subtotal = request.POST.get('subtotal')
-        detalle.pedido_id = request.POST.get('pedido_id')
-        detalle.menu_id = request.POST.get('menu_id')
+        detalle = DetallePedido()
+        detalle.cantidad = 0
+        detalle.precio = 0
+        detalle.pedido_id = 0
+        detalle.menu = menu
         # Lo agrego a la lista
         carrito.append(detalle)
-        messages.success(request, 'Detalle de pedido creado exitosamente.')
-        return redirect('/detallespedido/')
+        messages.success(request, 'Menú agregado exitosamente.')
+        return redirect('/carrito/')
     else:
         return render(request, 'detalles/form.html')
+
+# ============================================================================================================
+# Views del Carrito de Compras
+# ============================================================================================================
+
+@login_required(login_url='/login/')
+def ver_carrito(request):
+    """Muestra el carrito de compras del usuario"""
+    carrito = request.session.get('carrito', {})
+
+    items = []
+    total = 0
+
+    for menu_id, cantidad in carrito.items():
+        try:
+            menu = Menu.objects.get(id=menu_id)
+            subtotal = menu.precio * cantidad
+            items.append({
+                'menu': menu,
+                'cantidad': cantidad,
+                'subtotal': subtotal
+            })
+            total += subtotal
+        except Menu.DoesNotExist:
+            continue
+
+    context = {
+        'carrito': items,
+        'total': total
+    }
+    return render(request, 'detalles/carrito.html', context)
+
+@login_required(login_url='/login/')
+def agregar_al_carrito(request, menu_id):
+    """Agrega un producto al carrito"""
+    if request.method == 'POST':
+        carrito = request.session.get('carrito', {})
+        cantidad = int(request.POST.get('cantidad', 1))
+
+        if str(menu_id) in carrito:
+            carrito[str(menu_id)] += cantidad
+        else:
+            carrito[str(menu_id)] = cantidad
+
+        request.session['carrito'] = carrito
+        messages.success(request, f'Producto agregado al carrito (x{carrito[str(menu_id)]})')
+
+    return redirect(request.META.get('HTTP_REFERER', 'ver_carrito'))
+
+@login_required(login_url='/login/')
+def actualizar_carrito(request, menu_id):
+    """Actualiza la cantidad de un producto en el carrito"""
+    if request.method == 'POST':
+        carrito = request.session.get('carrito', {})
+        cantidad = int(request.POST.get('cantidad', 1))
+
+        if cantidad <= 0:
+            carrito.pop(str(menu_id), None)
+            messages.success(request, 'Producto eliminado del carrito')
+        else:
+            carrito[str(menu_id)] = cantidad
+            messages.success(request, f'Cantidad actualizada a {cantidad}')
+
+        request.session['carrito'] = carrito
+
+    return redirect('ver_carrito')
+
+@login_required(login_url='/login/')
+def eliminar_del_carrito(request, menu_id):
+    """Elimina un producto del carrito"""
+    if request.method == 'POST':
+        carrito = request.session.get('carrito', {})
+        if str(menu_id) in carrito:
+            carrito.pop(str(menu_id), None)
+            request.session['carrito'] = carrito
+            messages.success(request, 'Producto eliminado del carrito')
+
+    return redirect('ver_carrito')
+
+@login_required(login_url='/login/')
+def vaciar_carrito(request):
+    """Vacía el carrito completamente"""
+    request.session['carrito'] = {}
+    messages.success(request, 'Carrito vaciado')
+    return redirect('ver_carrito')
+
+@login_required(login_url='/login/')
+def guardar_carrito(request):
+    """Convierte el carrito en un pedido real"""
+    if request.method == 'POST':
+        carrito = request.session.get('carrito', {})
+
+        if not carrito:
+            messages.error(request, 'El carrito está vacío')
+            return redirect('ver_carrito')
+
+        # Calcular total y validar restaurante único
+        total = 0
+        items = []
+        restaurante_id = None
+
+        for menu_id, cantidad in carrito.items():
+            try:
+                menu = Menu.objects.get(id=menu_id)
+                if restaurante_id is None:
+                    restaurante_id = menu.restaurante.id
+                elif restaurante_id != menu.restaurante.id:
+                    messages.error(request, 'No puedes pedir de diferentes restaurantes en un mismo pedido')
+                    return redirect('ver_carrito')
+
+                subtotal = menu.precio * cantidad
+                total += subtotal
+                items.append({
+                    'menu': menu,
+                    'cantidad': cantidad,
+                    'precio': menu.precio
+                })
+            except Menu.DoesNotExist:
+                continue
+
+        if not items:
+            messages.error(request, 'No se pudieron procesar los productos')
+            return redirect('ver_carrito')
+
+        # Crear el pedido
+        pedido = Pedido.objects.create(
+            usuario=request.user,
+            restaurante_id=restaurante_id,
+            total=total,
+            estado='pendiente'
+        )
+
+        # Crear los detalles del pedido
+        for item in items:
+            DetallePedido.objects.create(
+                pedido=pedido,
+                menu=item['menu'],
+                cantidad=item['cantidad'],
+                precio=item['precio']
+            )
+
+        # Vaciar carrito
+        request.session['carrito'] = {}
+        messages.success(request, f'Pedido #{pedido.id} creado exitosamente')
+        return redirect('getallpedidos')
+
+    return redirect('ver_carrito')
+
+#Dar valores a los detalles del pedido
+@login_required(login_url='/login/')
+def dar_valores_item_carrito(request, id):
+    detalle = next((item for item in carrito if item.menu.id == id), None)
+    if detalle:
+        return render(request, 'detalles/item.html', {'detalle': detalle})
+    return redirect('/carrito/') 
+    
+
 
 #Guardar
 @login_required(login_url='/login/')
@@ -434,7 +594,7 @@ def guardardetalles(request):
 #Editar
 @login_required(login_url='/login/')
 def actualizardetallepedido(request, detalle_id):
-    detalle = DetallesPedido.objects.get(pk=detalle_id)
+    detalle = DetallePedido.objects.get(pk=detalle_id)
     if request.method == 'POST':
         detalle.cantidad = request.POST.get('cantidad')
         detalle.subtotal = request.POST.get('subtotal')
@@ -576,6 +736,7 @@ def crearasignacion(request, id_pedido):
 @staff_member_required
 def actualizarasignacion(request, asignacion_id):
     asignacion = AsignacionPedido.objects.get(pk=asignacion_id)
+    repartidor_antiguo = asignacion.repartidor
     if request.method == 'POST':
         asignacion.fecha_asignacion = request.POST.get('fecha_asignacion')
         asignacion.estado = request.POST.get('estado', '').strip()
@@ -583,9 +744,9 @@ def actualizarasignacion(request, asignacion_id):
         asignacion.repartidor_id = request.POST.get('repartidor_id')
         asignacion.save()
         messages.success(request, 'Asignación actualizada exitosamente.')
-        return redirect('/asignacionpedido/')
+        return redirect(f'/repartidores/{repartidor_antiguo.id}/asignaciones/')
     else:
-        return render(request, 'asignaciones/form.html', {'asignacion': asignacion})
+        return render(request, 'asignaciones/form.html', {'asignacion': asignacion, 'repartidores': Repartidor.objects.all()})
 
 #Eliminar
 @login_required(login_url='/login/')

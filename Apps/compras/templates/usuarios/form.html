@@ -2,7 +2,12 @@
 
 <h2>{% if usuario %}Editar Usuario{% else %}Crear Usuario{% endif %}</h2>
 
-<form id="userForm" method="post" novalidate action="{% if usuario %} /editarusuario/{{usuario.pk}}/ {% else %} /crearusuario/ {% endif %}">
+<form
+  id="userForm"
+  method="post"
+  novalidate
+  action="{% if usuario %} /usuarios/editar/{{ usuario.id }}/ {% else %} /crearusuario/ {% endif %}"
+>
   {% csrf_token %}
   <div>
     <label for="username">Usuario:</label>

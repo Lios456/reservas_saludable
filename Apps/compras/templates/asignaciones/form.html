@@ -24,7 +24,11 @@
 
         <div class="mb-3">
             <label for="pedido_id" class="form-label">Pedido</label>
-            <input type="text" name="pedido_id" id="pedido_id" value="{{ pedido.pk }}" disabled class="form-control">
+            <input type="text" name="pedido_id" id="pedido_id" value="{{ asignacion.pedido.id }}" class="form-control" 
+            {% if asignacion %}
+                readonly
+            {% endif %}
+                >
         </div>
 
         <div class="mb-3">
