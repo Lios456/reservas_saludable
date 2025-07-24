@@ -4,11 +4,112 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.forms import User, UserCreationForm
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import  Restaurante, Menu, Pedido, Repartidor, AsignacionPedido
+from .models import  *
+from django.db.models import Count, Sum, F
 
 
 
 # Create your views here.
+
+# ============================================================================================================
+# Dashboard
+# ============================================================================================================
+
+def dashboard(request):
+
+    #============
+    # KPI 1 Total usuarios registrados
+    #============
+
+    total_usuarios = User.objects.count()
+
+
+    #============
+    # KPI 2 Total de restaurantes registrados
+    #============
+    total_restaurantes = Restaurante.objects.count()
+
+    #============
+    # KPI 3 Total de pedidos
+    #============
+    total_pedidos = Pedido.objects.count()
+
+    #============
+    # KPI 4 Total de pedidos entregados
+    #============
+    total_pedidos_entregados = Pedido.objects.filter(estado='entregado').count()
+
+    #============
+    # KPI 5 Total pedidos pendientes
+    #============
+    total_pedidos_pendientes =Pedido.objects.filter(estado='pendiente').count()
+
+
+    #============
+    # KPI 6 Total de pedidos en camino
+    #============
+    total_pedidos_en_camino =Pedido.objects.filter(estado='en_camino').count()
+
+    #============
+    # KPI 7 Total de pedidos en preparación
+    #============
+    total_pedidos_en_preparacion =Pedido.objects.filter(estado='en_preparacion').count()
+
+    #============
+    # KPI 8 Porcentaje de pedidos en preparación
+    porcentaje_pedidos_en_preparacion = (total_pedidos_en_preparacion / Pedido.objects.count()) * 100 if Pedido.objects.count() > 0 else 0
+    #============
+
+
+    #============
+    # KPI 9 Ingresos totales
+    #============
+    ingresos_totales = sum(p.total for p in Pedido.objects.filter(estado='entregado'))
+
+
+    #============
+    # KPI 10 Repartidores con más entregas
+    #============
+    repartidores_con_mas_entregas = Repartidor.objects.annotate(total_entregas=Count('asignacionpedido__pedido')).order_by('-total_entregas')[:10]
+
+    #============
+    # KPI 11 5 Platos más vendidos
+    #============
+    platos_mas_vendidos = DetallePedido.objects.values('menu__nombre').annotate(total=Sum('cantidad')).order_by('-total')[:5]
+    
+    #============
+    # KPI 12 5 Restaurantes con más pedidos
+    #============
+    pedidos_por_restaurante = Pedido.objects.values('restaurante__nombre').annotate(total=Count('id')).order_by('-total')[:5]
+
+    #===========
+    # KPI 13 3 Usuarios con más pedidos
+    #===========
+    pedidos_por_usuario = Pedido.objects.values('usuario__username').annotate(total=Count('id')).order_by('-total')[:3]
+
+
+    #===========
+    # CONTEXTO
+    #===========
+
+    context = {
+        'total_pedidos': total_pedidos,
+        'total_pedidos_entregados': total_pedidos_entregados,
+        'total_pedidos_pendientes': total_pedidos_pendientes,
+        'total_usuarios': total_usuarios,
+        'total_restaurantes': total_restaurantes,
+        'total_pedidos_en_camino': total_pedidos_en_camino,
+        'total_pedidos_en_preparacion':total_pedidos_en_preparacion,
+        'ingresos_totales': ingresos_totales,
+        'repartidores_con_mas_entregas': repartidores_con_mas_entregas,
+        'platos_mas_vendidos': platos_mas_vendidos,
+        'pedidos_por_restaurante':pedidos_por_restaurante,
+        'pedidos_por_usuario':pedidos_por_usuario
+
+    }
+
+
+    return render(request, 'dashboard.html', context)
 
 def index(request):
     return render(request, 'index.html')
@@ -25,7 +126,10 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('/usuarios/')
+            if user.is_staff:
+                return redirect('/usuarios/')
+            else:
+                return redirect('/restaurantes/')
         else:
             messages.error(request, 'Credenciales inválidas', extra_tags='danger')
     return render(request, 'auth/login.html')
@@ -230,8 +334,12 @@ def eliminarmenu(request, menu_id):
 # ============================================================================================================
 
 #Listar
+@login_required(login_url='/login/')
 def getallpedidos(request):
-    pedidos = Pedido.objects.all()
+    if(request.user.is_staff):
+        pedidos = Pedido.objects.all()
+    else:
+        pedidos = Pedido.objects.filter(usuario=request.user)
     context = {'pedidos': pedidos}
     return render(request, 'pedidos/list.html', context)
 
@@ -290,20 +398,38 @@ def getalldetallespedido(request):
     context = {'detalles_pedido': detalles_pedido}
     return render(request, 'detalles/list.html', context)
 
+carrito = []
 #Crear
 @login_required(login_url='/login/')
 def creardetallespedido(request):
     if request.method == 'POST':
+        # Creo el detalle
         detalle = DetallesPedido()
         detalle.cantidad = request.POST.get('cantidad')
         detalle.subtotal = request.POST.get('subtotal')
         detalle.pedido_id = request.POST.get('pedido_id')
         detalle.menu_id = request.POST.get('menu_id')
-        detalle.save()
+        # Lo agrego a la lista
+        carrito.append(detalle)
         messages.success(request, 'Detalle de pedido creado exitosamente.')
         return redirect('/detallespedido/')
     else:
         return render(request, 'detalles/form.html')
+
+#Guardar
+@login_required(login_url='/login/')
+def guardardetalles(request):
+    if request.method == 'POST':
+        #Verifico si el carrito tiene por lo menos un detalle
+        if len(carrito) >=1:
+            for detalle in carrito:
+                detalle.save()
+            messages.success(request, 'Detalles guardados exitosamente.')
+            return redirect('/detallespedido/')
+        else:
+            messages.error(request, 'No tienes agregado ningún menú')
+            return redirect('/pedidos/')
+
 
 #Editar
 @login_required(login_url='/login/')

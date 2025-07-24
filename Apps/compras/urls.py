@@ -47,6 +47,9 @@ urlpatterns = [
     path('asignaciones/<int:id_repartidor>/', views.getallasignacionpedidobyrepartidor, name='getallasignacionpedidobyrepartidor'),
     path('crearasignacion/<int:id_pedido>/', views.crearasignacion, name='crearasignacion'),
     path('actualizarasignacion/<int:asignacion_id>/', views.actualizarasignacion, name='actualizarasignacion'),
-    path('eliminarasignacion/', views.eliminarasignacion, name='eliminarasignacion')
+    path('eliminarasignacion/', views.eliminarasignacion, name='eliminarasignacion'),
+
+    #Dashboard
+    path('dashboard/', views.dashboard, name='dashboard'),
 
 ]

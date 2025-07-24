@@ -1,0 +1,356 @@
+{% extends 'base_dashboard.html' %}
+<!-- I am a comment -->
+{% block content %}
+<div class="container">
+  <div class="row g-4">
+    <h1>Dashboard</h1>
+  </div>
+  <div class="row g-4">
+    <div
+      class="col-3 p-3 card shadow-lg border border-dark text-white {% if ingresos_totales < 1000 %} bg-warning {% else %} bg-success {% endif %}"
+    >
+      <div class="card-title text-center text-white">
+        Ingresos Totales <i class="fa-solid fa-dollar-sign"></i>
+      </div>
+      <div class="card-body text-center">{{ ingresos_totales }}$</div>
+    </div>
+    <div
+      class="col-3 p-3 card shadow-lg border border-dark text-white {% if total_usuarios < 1000 %} bg-warning {% else %} bg-success {% endif %}"
+    >
+      <div class="card-title text-center text-white">
+        Total de usuarios registrados <i class="fa-solid fa-users"></i>
+      </div>
+      <div class="card-body text-center">{{ total_usuarios }}</div>
+    </div>
+    <div
+      class="col-3 p-3 card shadow-lg border border-dark text-white {% if total_restaurantes < 1000 %} bg-warning {% else %} bg-success {% endif %}"
+    >
+      <div class="card-title text-center text-white">
+        Total de restaurantes registrados <i class="fa-solid fa-utensils"></i>
+      </div>
+      <div class="card-body text-center">{{ total_restaurantes }}</div>
+    </div>
+    <div
+      class="col-3 p-3 card shadow-lg border border-dark text-white {% if total_pedidos < 1000 %} bg-warning {% else %} bg-success {% endif %}"
+    >
+      <div class="card-title text-center text-white">
+        Total de pedidos registrados <i class="fa-solid fa-truck"></i>
+      </div>
+      <div class="card-body text-center">{{ total_pedidos }}</div>
+    </div>
+    <div
+      class="col-3 p-3 card shadow-lg border border-dark text-white {% if total_pedidos_entregados < 1000 %} bg-warning {% else %} bg-success {% endif %}"
+    >
+      <div class="card-title text-center text-white">
+        Total de pedidos entregados <i class="fa-solid fa-check"></i>
+      </div>
+      <div class="card-body text-center">{{ total_pedidos_entregados }}</div>
+    </div>
+    <div
+      class="col-3 p-3 card shadow-lg border border-dark text-white {% if total_pedidos_pendientes < 1000 %} bg-warning {% else %} bg-success {% endif %}"
+    >
+      <div class="card-title text-center text-white">
+        Total de pedidos pendientes <i class="fa-solid fa-clock"></i>
+      </div>
+      <div class="card-body text-center">{{ total_pedidos_pendientes }}</div>
+    </div>
+    <div
+      class="col-3 p-3 card shadow-lg border border-dark text-white {% if total_pedidos_en_preparacion < 1000 %} bg-warning {% else %} bg-success {% endif %}"
+    >
+      <div class="card-title text-center text-white">
+        Pedidos en preparación <i class="fa-solid fa-bowl-food"></i>
+      </div>
+      <div class="card-body text-center">
+        {{ total_pedidos_en_preparacion }}
+      </div>
+    </div>
+    <div
+      class="col-3 p-3 card shadow-lg border border-dark text-white {% if total_pedidos_en_camino < 1000 %} bg-warning {% else %} bg-success {% endif %}"
+    >
+      <div class="card-title text-center text-white">
+        Pedidos en camino <i class="fa-solid fa-street-view"></i>
+      </div>
+      <div class="card-body text-center">{{ total_pedidos_en_camino }}</div>
+    </div>
+  </div>
+  <!-- GRAFICOS CON CHART_JS -->
+  <div class="row">
+    <div class="col-6 card border-1 border-dark p-4 shadow-lg">
+      <h3 class="text-center">Total de Pedidos</h3>
+      <canvas id="chart1" width="50%" height="50%"></canvas>
+    </div>
+    <div class="col-6 card border-1 border-dark p-4 shadow-lg">
+      <h3 class="text-center">Porcentaje de Pedidos</h3>
+      <canvas id="chart2" width="50%" height="50%"></canvas>
+    </div>
+
+    <div class="col-6 card border-1 border-dark p-4 shadow-lg">
+      <h3 class="text-center">Top 10 Repartidores con Más Asignaciones</h3>
+      <canvas id="chart3" width="50%" height="50%"></canvas>
+    </div>
+    <div class="col-6 card border-1 border-dark p-4 shadow-lg">
+      <h3 class="text-center">Top 5 platos más vendidos</h3>
+      <canvas id="chart4" width="50%" height="50%"></canvas>
+    </div>
+    <div class="col-6 card border-1 border-dark p-4 shadow-lg">
+      <h3 class="text-center">Top 5 restaurantes con más pedidos</h3>
+      <canvas id="chart5" width="50%" height="50%"></canvas>
+    </div>
+    <div class="col-6 card border-1 border-dark p-4 shadow-lg">
+      <h3 class="text-center">Top 3 usuarios con más pedidos</h3>
+      <canvas id="chart6" width="50%" height="50%"></canvas>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+        const ctx = document.getElementById("chart1").getContext("2d");
+        const ctx2 = document.getElementById("chart2").getContext("2d");
+        const ctx3 = document.getElementById("chart3").getContext("2d");
+        const ctx4 = document.getElementById("chart4").getContext("2d");
+        const ctx5 = document.getElementById("chart5").getContext("2d");
+        const ctx6 = document.getElementById("chart6").getContext("2d");
+        // CHART 1
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: ["Pendiente", "En preparación", "En camino", "Entregado"],
+            datasets: [
+              {
+                label: "Total",
+                data: [
+                  {{ total_pedidos_pendientes }},
+                  {{ total_pedidos_en_preparacion }},
+                  {{ total_pedidos_en_camino }},
+                  {{ total_pedidos_entregados }},
+                ],
+                backgroundColor: [
+                  "rgb(255, 99, 133)",
+                  "rgb(54, 163, 235)",
+                  "rgb(255, 207, 86)",
+                  "rgb(75, 192, 192)",
+                ],
+                borderColor: [
+                  "rgb(0, 0, 0)",
+              ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+          },
+        });
+
+        // CHART 2
+        new Chart(ctx2, {
+          type: "pie",
+          data: {
+            labels: ["Pendiente", "En preparación", "En camino", "Entregado"],
+            datasets: [
+              {
+                label: "Total",
+                data: [
+                  {{ total_pedidos_pendientes }},
+                  {{ total_pedidos_en_preparacion }},
+                  {{ total_pedidos_en_camino }},
+                  {{ total_pedidos_entregados }},
+                ],
+                backgroundColor: [
+                  "rgb(255, 99, 133)",
+                  "rgb(54, 163, 235)",
+                  "rgb(255, 207, 86)",
+                  "rgb(75, 192, 192)",
+                ],
+                borderColor: [
+                  "rgb(0, 0, 0)",
+              ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    let label = context.label || "";
+                    let value = context.parsed || 0;
+                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    let percentage = total ? ((value / total) * 100).toFixed(1) : 0;
+                    return `${label}: ${value} (${percentage}%)`;
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        // CHART 3
+
+        new Chart(ctx3, {
+          type: "bar",
+          data: {
+            labels: [
+              {% for repartidor in repartidores_con_mas_entregas %}
+        '{{ repartidor.nombre|escapejs }} {{ repartidor.apellido|escapejs }}',
+      {% endfor %}],
+            datasets: [
+              {
+                label: "Total Pedidos asignados",
+                data: [
+                  {% for repartidor in repartidores_con_mas_entregas %}
+      {{ repartidor.total_entregas|escapejs }},
+    {% endfor %}
+                ],
+                backgroundColor: [
+                  "rgb(255, 99, 133)",
+                  "rgb(54, 163, 235)",
+                  "rgb(255, 207, 86)",
+                  "rgb(75, 192, 192)",
+                ],
+                borderColor: [
+                  "rgb(0, 0, 0)",
+              ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+          },
+        });
+
+        // CHART 4
+        new Chart(ctx4, {
+    type: "bar",
+    data: {
+      labels: [
+        {% for plato in platos_mas_vendidos %}
+          '{{ plato.menu__nombre|escapejs }}',
+        {% endfor %}
+      ],
+      datasets: [
+        {
+          label: "Total ventas",
+          data: [
+            {% for plato in platos_mas_vendidos %}
+              '{{ plato.total|escapejs }}',
+            {% endfor %}
+          ],
+          backgroundColor: [
+            "rgb(30, 255, 0)",
+            "rgb(217, 255, 0)",
+            "rgb(255, 183, 0)",
+            "rgb(255, 115, 0)",
+            "rgb(255, 0, 0)",
+          ],
+          borderColor: [
+            "rgb(0, 0, 0)",
+          ],
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      indexAxis: 'y',
+      scales: {
+        x: {
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+
+  // CHART 5
+        new Chart(ctx5, {
+    type: "bar",
+    data: {
+      labels: [
+        {% for res in pedidos_por_restaurante %}
+          '{{ res.restaurante__nombre|escapejs }}',
+        {% endfor %}
+      ],
+      datasets: [
+        {
+          label: "Total pedidos",
+          data: [
+            {% for res in pedidos_por_restaurante %}
+          '{{ res.total|escapejs }}',
+        {% endfor %}
+          ],
+          backgroundColor: [
+            "rgb(30, 255, 0)",
+            "rgb(217, 255, 0)",
+            "rgb(255, 183, 0)",
+            "rgb(255, 115, 0)",
+            "rgb(255, 0, 0)",
+          ],
+          borderColor: [
+            "rgb(0, 0, 0)",
+          ],
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      indexAxis: 'y',
+      scales: {
+        x: {
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+
+  // CHART 6
+        new Chart(ctx6, {
+    type: "bar",
+    data: {
+      labels: [
+        {% for pedido in pedidos_por_usuario %}
+          '{{ pedido.usuario__username|escapejs }}',
+        {% endfor %}
+      ],
+      datasets: [
+        {
+          label: "Total pedidos",
+          data: [
+            {% for pedido in pedidos_por_usuario %}
+          '{{ pedido.total|escapejs }}',
+        {% endfor %}
+          ],
+          backgroundColor: [
+            "rgb(30, 255, 0)",
+            "rgb(255, 183, 0)",
+            "rgb(255, 0, 0)",
+          ],
+          borderColor: [
+            "rgb(0, 0, 0)",
+          ],
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      indexAxis: 'y',
+      scales: {
+        x: {
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+</script>
+
+{% endblock %}

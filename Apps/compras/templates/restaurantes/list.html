@@ -1,57 +1,81 @@
-{% extends "base_dashboard.html" %}
+{% extends "base_dashboard.html" %} {% block content %}
+<div class="container mt-4 table-responsive">
+  <h2 class="mb-4">Lista de Restaurantes</h2>
 
-{% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Lista de Restaurantes</h2>
+  <!-- Mensajes de éxito/error -->
+  {% if messages %} {% for message in messages %}
+  <div
+    class="alert alert-{{ message.tags }} alert-dismissible fade show"
+    role="alert"
+  >
+    {{ message }}
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Cerrar"
+    ></button>
+  </div>
+  {% endfor %} {% endif %}
 
-    <!-- Mensajes de éxito/error -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+  <div class="mb-3">
+    <a href="{% url 'crearestaurante' %}" class="btn btn-success"
+      >+ Nuevo Restaurante</a
+    >
+  </div>
 
-    <div class="mb-3">
-        <a href="{% url 'crearestaurante' %}" class="btn btn-success">+ Nuevo Restaurante</a>
-    </div>
-
-    <table class="table table-bordered table-striped datatable">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Nombre</th>
-                <th>Dirección</th>
-                <th>Teléfono</th>
-                <th>Horario</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for restaurante in restaurantes %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ restaurante.nombre }}</td>
-                    <td>{{ restaurante.direccion }}</td>
-                    <td>{{ restaurante.telefono }}</td>
-                    <td>{{ restaurante.horario }}</td>
-                    <td>
-                        <a href="{% url 'actualizarrestaurante' restaurante.id %}" class="btn btn-primary btn-sm">Editar</a>
-                        <a href="/menus/{{ restaurante.id }}/" class="btn btn-warning btn-sm">Ver Menús</a>
-                        <form action="{% url 'eliminarrestaurante' restaurante.id %}" method="post" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que quieres eliminar este restaurante?');">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center">No hay restaurantes registrados.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <table class="table table-bordered table-striped datatable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nombre</th>
+        <th>Dirección</th>
+        <th>Teléfono</th>
+        <th>Horario</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for restaurante in restaurantes %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ restaurante.nombre }}</td>
+        <td>{{ restaurante.direccion }}</td>
+        <td>{{ restaurante.telefono }}</td>
+        <td>{{ restaurante.horario }}</td>
+        <td>
+          <a
+            href="{% url 'actualizarrestaurante' restaurante.id %}"
+            class="btn btn-primary btn-sm"
+            >Editar</a
+          >
+          <a href="/menus/{{ restaurante.id }}/" class="btn btn-warning btn-sm"
+            >Ver Menús</a
+          >
+          <form
+            action="{% url 'eliminarrestaurante' restaurante.id %}"
+            method="post"
+            style="display: inline"
+          >
+            {% csrf_token %}
+            <button
+              type="submit"
+              class="btn btn-danger btn-sm"
+              onclick="return confirm('¿Seguro que quieres eliminar este restaurante?');"
+            >
+              Eliminar
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="text-center">
+          No hay restaurantes registrados.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}

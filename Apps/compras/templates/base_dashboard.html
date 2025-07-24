@@ -1,277 +1,506 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sistema de entrega de pedidos</title>
+    <link
+      rel="shortcut icon"
+      type="image/png"
+      href="{% static './assets/images/logos/favicon.png' %}"
+    />
+    <link rel="stylesheet" href="{% static './assets/css/styles.min.css' %}" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/buttons/3.2.4/css/buttons.dataTables.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
+      integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sistema de entrega de pedidos</title>
-  <link rel="shortcut icon" type="image/png" href="{% static './assets/images/logos/favicon.png' %}" />
-  <link rel="stylesheet" href="{% static './assets/css/styles.min.css' %}" />
-  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.css">
-  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.2.4/css/buttons.dataTables.css">
-</head>
+    <style>
+      /* Estilos personalizados para el sidebar */
+      .sidebar {
+        background: #fff;
+        border-right: 1px solid #dee2e6;
+        min-height: 100vh;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      }
 
-<body>
-  <!--  Body Wrapper -->
-  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
-    data-sidebar-position="fixed">
-    <!--  App Topstrip -->
-    <div class="app-topstrip bg-dark py-6 px-3 w-100 d-lg-flex align-items-center justify-content-between">
-      <div class="d-flex align-items-center justify-content-center gap-5 mb-2 mb-lg-0">
-        <a class="d-flex justify-content-center" href="#">
-          <img src="{% static './assets/images/logos/logo-wrappixel.svg' %}" alt="" width="150" />
-        </a>
-      </div>
-    </div>
-    <!-- Sidebar Start -->
-    <aside class="left-sidebar">
-      <!-- Sidebar scroll-->
-      <div>
-        <div class="brand-logo d-flex align-items-center justify-content-between">
-          <a href="/" class="text-nowrap logo-img">
-            <img src="{% static './assets/images/logos/logo.svg' %}" alt="" />
-          </a>
-          <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
-            <i class="ti ti-x fs-6"></i>
-          </div>
-        </div>
-        <!-- Sidebar navigation-->
-        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
-          <ul id="sidebarnav">
-            <li class="nav-small-cap">
-              <iconify-icon icon="solar:menu-dots-linear" class="nav-small-cap-icon fs-4"></iconify-icon>
-              <span class="hide-menu">Administación</span>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="/dashboard/" aria-expanded="false">
-                <i class="ti ti-atom"></i>
-                <span class="hide-menu">Dashboard</span>
-              </a>
-            </li>
-            <!-- ---------------------------------- -->
-            <!-- Dashboard -->
-            <!-- ---------------------------------- -->
-            {% if user.is_authenticated and user.is_staff %}
-            <li class="sidebar-item">
-              <a class="sidebar-link justify-content-between" href="/usuarios/" aria-expanded="false">
-                <div class="d-flex align-items-center gap-3">
-                  <span class="d-flex">
-                    <i class="ti ti-users"></i>
-                  </span>
-                  <span class="hide-menu">Usuarios</span>
-                </div>
-              </a>
-            </li>
-            {% endif %}
-            {% if not user.is_authenticated %}
-            <li class="sidebar-item">
-              <a class="sidebar-link justify-content-between" href="/login/" aria-expanded="false">
-                <div class="d-flex align-items-center gap-3">
-                  <span class="d-flex">
-                    <i class="ti ti-users"></i>
-                  </span>
-                  <span class="hide-menu">Iniciar sesión</span>
-                </div>
-              </a>
-            </li>
-            {% endif %}
-            <li class="sidebar-item">
-              <a class="sidebar-link justify-content-between" href="/repartidores/" aria-expanded="false">
-                <div class="d-flex align-items-center gap-3">
-                  <span class="d-flex">
-                    <i class="ti ti-user"></i>
-                  </span>
-                  <span class="hide-menu">Repartidores</span>
-                </div>
-              </a>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link justify-content-between has-arrow" href="javascript:void(0)" aria-expanded="false">
-                <div class="d-flex align-items-center gap-3">
-                  <span class="d-flex">
-                    <i class="ti ti-shopping-cart"></i>
-                  </span>
-                  <span class="hide-menu">Restaurantes</span>
-                </div>
-              </a>
-              <ul aria-expanded="false" class="collapse first-level">
-                <li class="sidebar-item">
-                  <a class="sidebar-link justify-content-between" href="/restaurantes/">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="round-16 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-circle"></i>
-                      </div>
-                      <span class="hide-menu">Gestionar</span>
-                    </div>
-                  </a>
-                </li>
+      .sidebar .nav-link {
+        color: #495057;
+        padding: 12px 20px;
+        border-radius: 0;
+        transition: all 0.3s ease;
+      }
 
-                <li class="sidebar-item">
-                  <a class="sidebar-link justify-content-between" href="/pedidos/">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="round-16 d-flex align-items-center justify-content-center">
-                        <i class="ti ti-circle"></i>
-                      </div>
-                      <span class="hide-menu">Pedidos</span>
-                    </div>
-                  </a>
-                </li>
+      .sidebar .nav-link:hover {
+        background-color: #f8f9fa;
+        color: #007bff;
+      }
 
-              </ul>
-            </li>
-            {% if user.is_authenticated %}
-            <li class="sidebar-item">
-              <form action="/logout/" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger" onclick="return confirm('¿Seguro que quieres cerrar sesión?');">
-                  <div class="d-flex align-items-center gap-3">
-                    <div class="round-16 d-flex align-items-center justify-content-center">
-                      <i class="ti ti-trash"></i>
-                    </div>
-                    <span>Cerrar sesión</span>
-                  </div>
-                </button>
-              </form>
-            </li>
-            {% endif %}
-          </ul>
-        </nav>
-        <!-- End Sidebar navigation -->
-      </div>
-      <!-- End Sidebar scroll-->
-    </aside>
-    <!--  Sidebar End -->
-    <!--  Main wrapper -->
-    <div class="body-wrapper">
-      <div class="body-wrapper-inner">
-        <div class="container-fluid">
-          <div class="card">
-            <div class="card-body">{% block content %} {% endblock %}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <script src="{% static './assets/libs/jquery/dist/jquery.min.js' %}"></script>
-  <script src="{% static './assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
-  <script src="{% static './assets/js/sidebarmenu.js' %}"></script>
-  <script src="{% static './assets/js/app.min.js' %}"></script>
-  <script src="{% static './assets/libs/simplebar/dist/simplebar.js' %}"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+      .sidebar .nav-link.active {
+        background-color: #007bff;
+        color: white;
+      }
 
-  <script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
-  <script src="https://cdn.datatables.net/buttons/3.2.4/js/dataTables.buttons.js"></script>
-  <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.dataTables.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-  <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.html5.min.js"></script>
+      .sidebar .nav-link i {
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+      }
 
-  <script>
-    $(document).ready(function () {
-      $('.select2').select2();
-      new DataTable('.datatable', {
-        layout: {
-          topStart: {
-            buttons: ['copyHtml5', 'excelHtml5', 'csvHtml5', 'pdfHtml5']
-          }
+      .brand-logo {
+        padding: 20px;
+        border-bottom: 1px solid #dee2e6;
+        text-align: center;
+      }
+
+      .brand-logo img {
+        max-height: 40px;
+      }
+
+      .user-greeting {
+        background-color: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #dee2e6;
+        font-weight: 500;
+        color: #6c757d;
+      }
+
+      /* Botón toggle para móvil */
+      .navbar-toggler {
+        border: none;
+        padding: 4px 8px;
+      }
+
+      .navbar-toggler:focus {
+        box-shadow: none;
+      }
+
+      /* Contenido principal */
+      .main-content {
+        transition: margin-left 0.3s ease;
+      }
+
+      /* Responsive */
+      @media (max-width: 991.98px) {
+        .sidebar {
+          position: fixed;
+          top: 0;
+          left: -100%;
+          width: 280px;
+          z-index: 1050;
+          transition: left 0.3s ease;
         }
+
+        .sidebar.show {
+          left: 0;
+        }
+
+        .main-content {
+          margin-left: 0 !important;
+        }
+
+        .sidebar-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 1040;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+          opacity: 1;
+          visibility: visible;
+        }
+      }
+
+      @media (min-width: 992px) {
+        .sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 280px;
+          z-index: 1020;
+        }
+
+        .main-content {
+          margin-left: 280px;
+        }
+
+        .navbar-toggler {
+          display: none;
+        }
+      }
+
+      /* Dropdown en sidebar */
+      .sidebar .dropdown-toggle::after {
+        float: right;
+        margin-top: 8px;
+      }
+
+      .sidebar .dropdown-menu {
+        background: #f8f9fa;
+        border: none;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .sidebar .dropdown-item {
+        padding: 10px 40px;
+        color: #6c757d;
+      }
+
+      .sidebar .dropdown-item:hover {
+        background-color: #e9ecef;
+        color: #007bff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Overlay para cerrar sidebar en móvil -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="d-flex">
+      <!-- Sidebar -->
+      <nav class="sidebar" id="sidebar">
+        <!-- Logo -->
+        <div class="brand-logo">
+          <a href="/" class="text-decoration-none">
+            <img
+              src="{% static './assets/images/logos/logo.svg' %}"
+              alt="Logo"
+              class="img-fluid"
+            />
+          </a>
+        </div>
+
+        <!-- Saludo usuario -->
+        {% if user.is_authenticated %}
+        <div class="user-greeting">
+          <i class="fas fa-user-circle me-2"></i>
+          Hola {{ user.username }}!
+        </div>
+        {% endif %}
+
+        <!-- Navegación -->
+        <ul class="nav nav-pills flex-column">
+          <!-- Dashboard (solo para staff) -->
+          {% if user.is_authenticated and user.is_staff %}
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard/">
+              <i class="fas fa-tachometer-alt"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/usuarios/">
+              <i class="fas fa-users"></i>
+              Usuarios
+            </a>
+          </li>
+          {% endif %}
+
+          <!-- Login (solo para no autenticados) -->
+          {% if not user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="/login/">
+              <i class="fas fa-sign-in-alt"></i>
+              Iniciar sesión
+            </a>
+          </li>
+          {% endif %}
+
+          <!-- Repartidores -->
+          <li class="nav-item">
+            <a class="nav-link" href="/repartidores/">
+              <i class="fas fa-motorcycle"></i>
+              Repartidores
+            </a>
+          </li>
+
+          <!-- Restaurantes (con dropdown) -->
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <i class="fas fa-utensils"></i>
+              Restaurantes
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class="dropdown-item" href="/restaurantes/">
+                  <i class="fas fa-search me-2"></i>Explorar
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="/pedidos/">
+                  <i class="fas fa-shopping-bag me-2"></i>Pedidos
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Logout (solo para autenticados) -->
+          {% if user.is_authenticated %}
+          <li class="nav-item mt-3">
+            <form action="/logout/" method="post" class="d-inline w-100">
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="nav-link btn btn-link text-start w-100 text-danger"
+                onclick="return confirm('¿Seguro que quieres cerrar sesión?');"
+              >
+                <i class="fas fa-sign-out-alt"></i>
+                Cerrar sesión
+              </button>
+            </form>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+
+      <!-- Contenido principal -->
+      <div class="main-content flex-grow-1">
+        <!-- Navbar para móvil -->
+        <nav class="navbar navbar-light bg-light d-lg-none">
+          <div class="container-fluid">
+            <button class="navbar-toggler" type="button" id="sidebarToggle">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <span class="navbar-brand mb-0 h1">Sistema de Pedidos</span>
+          </div>
+        </nav>
+
+        <!-- Contenido de la página -->
+        <div class="container-fluid py-4">
+          <div class="card border-1 border-dark">
+            <div class="card-body">
+              {% block content %}
+              <h1>Bienvenido al Sistema</h1>
+              <p>Selecciona una opción del menú lateral para comenzar.</p>
+              {% endblock %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="{% static './assets/libs/jquery/dist/jquery.min.js' %}"></script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Otros scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.4/js/dataTables.buttons.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.dataTables.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.html5.min.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        // Inicializar Select2
+        $(".select2").select2();
+
+        // Inicializar DataTables
+        if ($(".datatable").length) {
+          new DataTable(".datatable", {
+            layout: {
+              topStart: {
+                buttons: ["copyHtml5", "excelHtml5", "csvHtml5", "pdfHtml5"],
+              },
+            },
+          });
+        }
+
+        // Configuración de validación jQuery
+        const validationRules = {
+          username: {
+            required: true,
+            minlength: 3,
+            maxlength: 150,
+          },
+          email: {
+            required: true,
+            email: true,
+          },
+          password1: {
+            required: true,
+            minlength: 8,
+          },
+          password2: {
+            required: true,
+            equalTo: "#usuario-password1",
+          },
+          nombre: {
+            required: true,
+            minlength: 2,
+            maxlength: 255,
+          },
+          telefono: {
+            required: true,
+            phoneEC: true,
+          },
+          direccion: {
+            required: true,
+            minlength: 5,
+          },
+          horario: {
+            required: true,
+          },
+          precio: {
+            required: true,
+            number: true,
+            min: 0.01,
+          },
+          cantidad: {
+            required: true,
+            digits: true,
+            min: 1,
+          },
+          edad: {
+            required: true,
+            digits: true,
+            range: [18, 65],
+          },
+          descripcion: {
+            required: true,
+            minlength: 10,
+          },
+          restaurante_id: {
+            required: true,
+          },
+          menu_id: {
+            required: true,
+          },
+          pedido_id: {
+            required: true,
+          },
+          repartidor_id: {
+            required: true,
+          },
+          estado: {
+            required: true,
+          },
+        };
+
+        // Validación personalizada para teléfonos ecuatorianos
+        $.validator.addMethod(
+          "phoneEC",
+          function (value, element) {
+            return this.optional(element) || /^(\+593|0)?[0-9]{9}$/.test(value);
+          },
+          "Por favor ingrese un número de teléfono válido de Ecuador"
+        );
+
+        // Funcionalidad del sidebar móvil
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.getElementById("sidebar");
+        const overlay = document.getElementById("sidebarOverlay");
+
+        // Función para mostrar sidebar
+        function showSidebar() {
+          sidebar.classList.add("show");
+          overlay.classList.add("show");
+          document.body.style.overflow = "hidden";
+        }
+
+        // Función para ocultar sidebar
+        function hideSidebar() {
+          sidebar.classList.remove("show");
+          overlay.classList.remove("show");
+          document.body.style.overflow = "";
+        }
+
+        // Toggle sidebar al hacer clic en el botón
+        if (sidebarToggle) {
+          sidebarToggle.addEventListener("click", function () {
+            if (sidebar.classList.contains("show")) {
+              hideSidebar();
+            } else {
+              showSidebar();
+            }
+          });
+        }
+
+        // Cerrar sidebar al hacer clic en el overlay
+        if (overlay) {
+          overlay.addEventListener("click", hideSidebar);
+        }
+
+        // Cerrar sidebar al hacer clic en un enlace (en móvil)
+        sidebar
+          .querySelectorAll(".nav-link, .dropdown-item")
+          .forEach((link) => {
+            link.addEventListener("click", function () {
+              if (window.innerWidth < 992) {
+                hideSidebar();
+              }
+            });
+          });
+
+        // Cerrar sidebar con tecla Escape
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && sidebar.classList.contains("show")) {
+            hideSidebar();
+          }
+        });
+
+        // Manejar cambio de tamaño de ventana
+        window.addEventListener("resize", function () {
+          if (window.innerWidth >= 992) {
+            hideSidebar();
+          }
+        });
+
+        // Marcar enlace activo basado en la URL actual
+        const currentPath = window.location.pathname;
+        sidebar.querySelectorAll(".nav-link").forEach((link) => {
+          if (link.getAttribute("href") === currentPath) {
+            link.classList.add("active");
+          }
+        });
       });
-      $(".tree-toggle").click(function () {
-        const target = $(this).data("target");
-        $("#" + target).toggleClass("active");
-        $(this).toggleClass("fa-chevron-right fa-chevron-down");
-      });
+    </script>
 
-      // Configuración de validación jQuery
-      const validationRules = {
-        username: {
-          required: true,
-          minlength: 3,
-          maxlength: 150,
-        },
-        email: {
-          required: true,
-          email: true,
-        },
-        password1: {
-          required: true,
-          minlength: 8,
-        },
-        password2: {
-          required: true,
-          equalTo: "#usuario-password1",
-        },
-        nombre: {
-          required: true,
-          minlength: 2,
-          maxlength: 255,
-        },
-        telefono: {
-          required: true,
-          phoneEC: true,
-        },
-        direccion: {
-          required: true,
-          minlength: 5,
-        },
-        horario: {
-          required: true,
-        },
-        precio: {
-          required: true,
-          number: true,
-          min: 0.01,
-        },
-        cantidad: {
-          required: true,
-          digits: true,
-          min: 1,
-        },
-        edad: {
-          required: true,
-          digits: true,
-          range: [18, 65],
-        },
-        descripcion: {
-          required: true,
-          minlength: 10,
-        },
-        restaurante_id: {
-          required: true,
-        },
-        menu_id: {
-          required: true,
-        },
-        pedido_id: {
-          required: true,
-        },
-        repartidor_id: {
-          required: true,
-        },
-        estado: {
-          required: true,
-        },
-      };
+    {% block extra_js %} {% endblock %}
 
-      // Validación personalizada para teléfonos ecuatorianos
-      $.validator.addMethod(
-        "phoneEC",
-        function (value, element) {
-          return this.optional(element) || /^(\+593|0)?[0-9]{9}$/.test(value);
-        },
-        "Por favor ingrese un número de teléfono válido de Ecuador"
-      );
-    });
-  </script>
-  {% block extra_js %} {% endblock %}
-
-  <!-- solar icons -->
-  <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
-</body>
-
+    <!-- Solar icons -->
+    <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+  </body>
 </html>
